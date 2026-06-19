@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import 'bulma/css/bulma.css';
 import './App.scss';
 
-// 1. Definição do Enum conforme solicitado
 export enum SortType {
   Default = 'default',
   Alphabetically = 'alphabetically',
@@ -23,12 +22,10 @@ export const goodsFromServer: string[] = [
 ];
 
 export const App: React.FC = () => {
-  // Mantemos o tipo de ordenação atual e o estado de inversão
   const [sortType, setSortType] = useState<SortType>(SortType.Default);
   const [isReversed, setIsReversed] = useState<boolean>(false);
 
-  // Derivamos a lista ordenada com base no estado atual (Single Source of Truth)
-  const visibleGoods = [...goodsFromServer];
+  let visibleGoods = [...goodsFromServer];
 
   if (sortType === SortType.Alphabetically) {
     visibleGoods.sort((a, b) => a.localeCompare(b));
@@ -40,7 +37,6 @@ export const App: React.FC = () => {
     visibleGoods.reverse();
   }
 
-  // Handlers para atualizar o estado
   const handleSortAlphabetically = () => {
     setSortType(SortType.Alphabetically);
   };
@@ -58,7 +54,6 @@ export const App: React.FC = () => {
     setIsReversed(false);
   };
 
-  // Verifica se a lista foi modificada para exibir ou ocultar o botão Reset
   const isModified = sortType !== SortType.Default || isReversed;
 
   return (
@@ -66,7 +61,7 @@ export const App: React.FC = () => {
       <div className="buttons">
         <button
           type="button"
-          className={`button is-info is-light ${sortType === SortType.Alphabetically ? 'is-active' : ''}`}
+          className={`button is-info ${sortType === SortType.Alphabetically ? 'is-active' : 'is-light'}`}
           onClick={handleSortAlphabetically}
         >
           Sort alphabetically
@@ -74,7 +69,7 @@ export const App: React.FC = () => {
 
         <button
           type="button"
-          className={`button is-success is-light ${sortType === SortType.ByLength ? 'is-active' : ''}`}
+          className={`button is-success ${sortType === SortType.ByLength ? 'is-active' : 'is-light'}`}
           onClick={handleSortByLength}
         >
           Sort by length
@@ -82,13 +77,12 @@ export const App: React.FC = () => {
 
         <button
           type="button"
-          className={`button is-warning is-light ${isReversed ? 'is-active' : ''}`}
+          className={`button is-warning ${isReversed ? 'is-active' : 'is-light'}`}
           onClick={handleReverse}
         >
           Reverse
         </button>
 
-        {/* O botão Reset só aparece se a lista tiver sido modificada */}
         {isModified && (
           <button
             type="button"
