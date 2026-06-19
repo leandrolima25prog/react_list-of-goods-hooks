@@ -2,6 +2,13 @@ import React, { useState } from 'react';
 import 'bulma/css/bulma.css';
 import './App.scss';
 
+// 1. Definição do Enum conforme solicitado
+export enum SortType {
+  Default = 'default',
+  Alphabetically = 'alphabetically',
+  ByLength = 'byLength',
+}
+
 export const goodsFromServer: string[] = [
   'Dumplings',
   'Carrot',
@@ -16,73 +23,85 @@ export const goodsFromServer: string[] = [
 ];
 
 export const App: React.FC = () => {
-  // Criamos o estado iniciando com uma cópia do array original
-  const [goods, setGoods] = useState<string[]>([...goodsFromServer]);
+  // Mantemos o tipo de ordenação atual e o estado de inversão
+  const [sortType, setSortType] = useState<SortType>(SortType.Default);
+  const [isReversed, setIsReversed] = useState<boolean>(false);
 
-  // Função para ordenar alfabeticamente
-  const sortAlphabetically = () => {
-    const sorted = [...goods].sort((a, b) => a.localeCompare(b));
+  // Derivamos a lista ordenada com base no estado atual (Single Source of Truth)
+  const visibleGoods = [...goodsFromServer];
 
-    setGoods(sorted);
+  if (sortType === SortType.Alphabetically) {
+    visibleGoods.sort((a, b) => a.localeCompare(b));
+  } else if (sortType === SortType.ByLength) {
+    visibleGoods.sort((a, b) => a.length - b.length);
+  }
+
+  if (isReversed) {
+    visibleGoods.reverse();
+  }
+
+  // Handlers para atualizar o estado
+  const handleSortAlphabetically = () => {
+    setSortType(SortType.Alphabetically);
   };
 
-  // Função para ordenar pelo tamanho do texto (length)
-  const sortByLength = () => {
-    const sorted = [...goods].sort((a, b) => a.length - b.length);
-
-    setGoods(sorted);
+  const handleSortByLength = () => {
+    setSortType(SortType.ByLength);
   };
 
-  // Função para inverter a ordem atual
-  const reverseList = () => {
-    const reversed = [...goods].reverse();
-
-    setGoods(reversed);
+  const handleReverse = () => {
+    setIsReversed(prev => !prev);
   };
 
-  // Função para resetar para o estado inicial vindo do "servidor"
-  const resetList = () => {
-    setGoods([...goodsFromServer]);
+  const handleReset = () => {
+    setSortType(SortType.Default);
+    setIsReversed(false);
   };
+
+  // Verifica se a lista foi modificada para exibir ou ocultar o botão Reset
+  const isModified = sortType !== SortType.Default || isReversed;
 
   return (
     <div className="section content">
       <div className="buttons">
         <button
           type="button"
-          className="button is-info is-light"
-          onClick={sortAlphabetically}
+          className={`button is-info is-light ${sortType === SortType.Alphabetically ? 'is-active' : ''}`}
+          onClick={handleSortAlphabetically}
         >
           Sort alphabetically
         </button>
 
         <button
           type="button"
-          className="button is-success is-light"
-          onClick={sortByLength}
+          className={`button is-success is-light ${sortType === SortType.ByLength ? 'is-active' : ''}`}
+          onClick={handleSortByLength}
         >
           Sort by length
         </button>
 
         <button
           type="button"
-          className="button is-warning is-light"
-          onClick={reverseList}
+          className={`button is-warning is-light ${isReversed ? 'is-active' : ''}`}
+          onClick={handleReverse}
         >
           Reverse
         </button>
 
-        <button
-          type="button"
-          className="button is-danger is-light"
-          onClick={resetList}
-        >
-          Reset
-        </button>
+        {/* O botão Reset só aparece se a lista tiver sido modificada */}
+        {isModified && (
+          <button
+            type="button"
+            className="button is-danger is-light"
+            onClick={handleReset}
+          >
+            Reset
+          </button>
+        )}
       </div>
 
       <ul>
-        {goods.map(good => (
+        {visibleGoods.map(good => (
           <li key={good} data-cy="Good">
             {good}
           </li>
